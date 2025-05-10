@@ -23,7 +23,6 @@ const Login = () => {
             console.error('Login error:', error);
             alert('Invalid email or password');
         }
-        console.log('Form Data:', data);
     };
 
     const renderFromData = () =>  <form onSubmit={handleSubmit}>

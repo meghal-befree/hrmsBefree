@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Paper, CircularProgress,
-    Box, Typography, TablePagination
+    Box, Typography, TablePagination, Avatar
 } from '@mui/material';
 import { getUsersInformation } from '../../api/auth.ts';
 
@@ -10,6 +10,7 @@ interface User {
     id: number;
     username: string;
     email: string;
+    image: string;
 }
 
 const UserDetailsTable = () => {
@@ -49,6 +50,29 @@ const UserDetailsTable = () => {
         return <Box display="flex" justifyContent="center"><CircularProgress /></Box>;
     }
 
+    const renderTableBody = () => {
+        return users.map(user => {
+            console.log(user);
+            console.log(user.image);
+            console.log(`http://localhost:3000${user.image}`);
+            return (
+                <TableRow key={user.id}>
+                    <TableCell>{user.id}</TableCell>
+                    <TableCell>
+                        <Avatar
+                            alt={user.username}
+                            src={user.image ? `http://localhost:3000${user.image}` : undefined}
+                        >
+                            {!user.image && user.username?.[0].toUpperCase()}
+                        </Avatar>
+                    </TableCell>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                </TableRow>
+            )
+        });
+    };
+
     return (
         <Box>
             <Typography variant="h5" align="center" mb={2}>User List</Typography>
@@ -57,18 +81,13 @@ const UserDetailsTable = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
+                            <TableCell>Profile Image</TableCell>
                             <TableCell>Username</TableCell>
                             <TableCell>Email</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {users.map(user => (
-                            <TableRow key={user.id}>
-                                <TableCell>{user.id}</TableCell>
-                                <TableCell>{user.username}</TableCell>
-                                <TableCell>{user.email}</TableCell>
-                            </TableRow>
-                        ))}
+                        {renderTableBody()}
                     </TableBody>
                 </Table>
             </TableContainer>

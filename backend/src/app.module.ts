@@ -2,9 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './services/auth/auth.module';
-import { User } from './entities/user.entity';
-import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { typeOrmConfig } from './config/db';
 
 @Module({
   imports: [
@@ -16,25 +15,8 @@ import { PassportModule } from '@nestjs/passport';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const dbPort = config.get<string>('DB_PORT');
-        if (!dbPort) {
-          throw new Error('DB_PORT is not defined in environment variables');
-        }
-
-        return {
-          type: 'mysql',
-          host: config.get<string>('DB_HOST'),
-          port: parseInt(dbPort, 10),
-          username: config.get<string>('DB_USERNAME'),
-          password: config.get<string>('DB_PASSWORD'),
-          database: config.get<string>('DB_NAME'),
-          entities: [User],
-          synchronize: true,
-        };
-      },
+      useFactory: typeOrmConfig,
     }),
-
     AuthModule,
   ],
 })
