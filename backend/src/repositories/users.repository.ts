@@ -26,7 +26,7 @@ export class UsersRepository {
 
   async findByUsername(username: string): Promise<User | null> {
     // one way using Repository methods
-    // return this.repo.findOne({ where: { username } });
+   // return this.repo.findOne({ where: { username } });
 
     // another way using query builder
     const user = await this.repo
@@ -37,15 +37,12 @@ export class UsersRepository {
     return user || null;
   }
 
-  // async findAll(): Promise<User[]> {
-  //   return await this.repo.createQueryBuilder('user').getMany();
-  // }
 
-  async findAll(page = 1, limit = 10) {
+  async findAllUser(page = 1, limit = 10) {
     const [data, total] = await this.repo.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
-      order: { id: 'DESC' }, // Optional: sort by ID as createdAt is not available
+      order: { id: 'DESC' },
     });
 
     return {
@@ -81,4 +78,10 @@ export class UsersRepository {
       password: user.password,
     };
   }
+
+  async findByUserId(id: number) {
+    return this.repo.findOne({ where: { id } });
+  }
+
+
 }

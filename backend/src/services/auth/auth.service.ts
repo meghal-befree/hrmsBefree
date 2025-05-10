@@ -43,7 +43,12 @@ export class AuthService {
     return this.usersRepository.save(user);
   }
 
-  async findAll(page: number, limit: number) {
-    return this.usersRepository.findAll(page, limit);
+  async findAllUser(page: number, limit: number) {
+    return this.usersRepository.findAllUser(page, limit);
   }
+
+  async findByUserId(id: number) {
+    return this.usersRepository.findByUserId(id);
+  }
+
 }

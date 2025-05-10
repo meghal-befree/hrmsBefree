@@ -10,3 +10,16 @@ export const getLocalStorageToken = () => {
         return null;
     }
 };
+
+export const getLocalStorageUserId = () => {
+    const user = localStorage.getItem('user');
+    if (!user) return null;
+
+    try {
+        const parsedUser = JSON.parse(user);
+        return parsedUser.user.id;
+    } catch (e) {
+        console.error('Failed to parse user from localStorage', e);
+        return null;
+    }
+};

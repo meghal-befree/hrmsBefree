@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import {Controller, Post, Body, Get, Query, Param} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, SignupDto } from '../../dtos/login.dto';
 
@@ -28,6 +28,12 @@ export class AuthController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ): Promise<any> {
-    return this.authService.findAll(Number(page), Number(limit));
+    return this.authService.findAllUser(Number(page), Number(limit));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('users/:id')
+  async findOne(@Param('id') id: string) {
+    return this.authService.findByUserId(Number(id));
   }
 }
