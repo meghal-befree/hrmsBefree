@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersRepository } from '../../repositories/users.repository';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../entities/user.entity';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class AuthService {
@@ -51,4 +53,34 @@ export class AuthService {
     return this.usersRepository.findByUserId(id);
   }
 
+  async updateUser(id: number, updateData: { username?: string; email?: string; image?: string }) {
+    const user = await this.usersRepository.findByUserId(id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // 🧹 Delete old image if new image is uploaded
+    if (updateData.image && user.image) {
+      const oldImagePath = path.join(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          'uploads',
+          'users',
+          path.basename(user.image),
+      );
+
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+      }
+    }
+
+    user.username = updateData.username ?? user.username;
+    user.email = updateData.email ?? user.email;
+    user.image = updateData.image ?? user.image;
+
+    return this.usersRepository.update(user);
+  }
 }

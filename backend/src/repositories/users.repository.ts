@@ -83,5 +83,12 @@ export class UsersRepository {
     return this.repo.findOne({ where: { id } });
   }
 
+  async update(user: Partial<User>): Promise<{ username: string; email: string }> {
+    const updatedUser = await this.repo.save(user);
+    return {
+      username: updatedUser.username,
+      email: updatedUser.email,
+    };
+  }
 
 }

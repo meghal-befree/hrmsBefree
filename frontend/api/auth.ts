@@ -12,8 +12,13 @@ export const getUsersInformation = async (page = 1, limit = 5) => {
     return http.get(`/auth/users?page=${page}&limit=${limit}`);
 };
 
-export const updateUser = async (id: number, data: { username: string; email: string; password?: string }) => {
-    return http.put(`/auth/users/${id}`, data);
+export const updateUser = async (id: number, data: FormData) => {
+    return http.put(`/auth/users/${id}`, data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+    });
 };
 
 export const getUserById = async (id: number) => {
