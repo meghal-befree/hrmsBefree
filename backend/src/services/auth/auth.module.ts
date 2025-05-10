@@ -10,12 +10,14 @@ import { UsersRepository } from '../../repositories/users.repository';
 import { User } from '../../entities/user.entity';
 import { JwtStrategy } from '../../jwt/jwt.strategy';
 import { JwtAuthGuard } from '../../jwt/jwt-auth.guard';
+import {PdfModule} from "../pdf/pdf.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
     ConfigModule,
+    PdfModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,30 +12,13 @@ export class UsersRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     // one way using Repository methods
-    // return this.repo.findOne({ where: { email } });
-
-    // another way using query builder
-    const user = await this.repo
-      .createQueryBuilder('user')
-      .where('user.email = :email', { email })
-      .getOne();
-
-    return user || null;
+    return this.repo.findOne({ where: { email } });
   }
 
   async findByUsername(username: string): Promise<User | null> {
     // one way using Repository methods
-   // return this.repo.findOne({ where: { username } });
-
-    // another way using query builder
-    const user = await this.repo
-      .createQueryBuilder('user')
-      .where('user.username = :username', { username })
-      .getOne();
-
-    return user || null;
+    return this.repo.findOne({ where: { username } });
   }
-
 
   async findAllUser(page = 1, limit = 10) {
     const [data, total] = await this.repo.findAndCount({
@@ -54,41 +36,20 @@ export class UsersRepository {
   }
 
   async save(user: Partial<User>): Promise<User> {
-    // one way using Repository methods
-    // return this.repo.save(user);
-
-    // another way using query builder
-    const result = await this.repo.manager.query<{
-      insertId: number;
-      affectedRows: number;
-    }>(`INSERT INTO user (username, email, password) VALUES (?, ?, ?)`, [
-      user.username,
-      user.email,
-      user.password,
-    ]);
-
-    // Assuming your user table has an auto-generated id column, you can return the result as your user
-    if (!user.username || !user.email || !user.password) {
-      throw new Error('Username, email and password are required');
-    }
-    return {
-      id: result.insertId,
-      username: user.username,
-      email: user.email,
-      password: user.password,
-    };
+    return this.repo.save(user);
   }
 
   async findByUserId(id: number) {
     return this.repo.findOne({ where: { id } });
   }
 
-  async update(user: Partial<User>): Promise<{ username: string; email: string }> {
+  async update(
+    user: Partial<User>,
+  ): Promise<{ username: string; email: string }> {
     const updatedUser = await this.repo.save(user);
     return {
       username: updatedUser.username,
       email: updatedUser.email,
     };
   }
-
 }

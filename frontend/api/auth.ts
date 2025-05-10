@@ -21,6 +21,22 @@ export const updateUser = async (id: number, data: FormData) => {
     });
 };
 
+export const downloadUserPdf = async (page?: number, limit?: number) => {
+    const params: any = {};
+    if (page) params.page = page;
+    if (limit) params.limit = limit;
+
+    return http.post(
+        `/auth/users/download-pdf`,
+        {},
+        {
+            responseType: 'blob',
+            withCredentials: true,
+            params,
+        }
+    );
+};
+
 export const getUserById = async (id: number) => {
     return http.get(`/auth/users/${id}`);
 };
