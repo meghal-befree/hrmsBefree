@@ -1,0 +1,16 @@
+.homeContainer {
+  padding: 10px;
+
+  .headingContainer{
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .tableContainer{
+    margin-top: 10px;
+  }
+}
