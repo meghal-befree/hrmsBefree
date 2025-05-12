@@ -31,6 +31,13 @@ export class AuthService {
       });
     }
 
+    if (user.isDeleted) {
+      throw new UnauthorizedException({
+        message:
+          'Your account is deleted. Please contact support Team for more details.',
+      });
+    }
+
     const { password: _, ...result } = user;
     return result;
   }
@@ -78,6 +85,16 @@ export class AuthService {
 
   async findByUserId(id: number) {
     return this.usersRepository.findByUserId(id);
+  }
+
+  async softDeleteUser(id: number) {
+    const user = await this.usersRepository.findByUserId(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.isDeleted = true;
+    await this.usersRepository.softDeleteUser(user);
+    return { message: 'User soft deleted successfully' };
   }
 
   async updateUser(

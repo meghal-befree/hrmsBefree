@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
     Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Paper, CircularProgress,
-    Box, Typography, TablePagination, Avatar, IconButton
+    Box, Typography, TablePagination, Avatar, IconButton, Switch
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getUsersInformation } from '../../api/auth.ts';
+import {getUsersInformation, updateUserStatus} from '../../api/auth.ts';
 import {getLocalStorageIsAdmin} from "../utils/util.ts";
 import {useNavigate} from "react-router-dom";
 
@@ -15,14 +15,16 @@ interface User {
     username: string;
     email: string;
     image: string;
+    isActiveUser: boolean;
 }
 
 const UserDetailsTable = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(0); // 0-based index for TablePagination
+    const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [totalCount, setTotalCount] = useState(0);
+
     const navigate = useNavigate();
 
     const currentUserRole = getLocalStorageIsAdmin() ? 'admin' : 'user';
@@ -58,14 +60,25 @@ const UserDetailsTable = () => {
     }
 
     const handleEdit = (id: number) => {
-        console.log('Edit', id);
         navigate(`/edit/${id}`)
     }
 
     const handleDelete = (id: number) => {
-        console.log('Delete', id);
         navigate(`/delete/${id}`)
     }
+
+    const handleToggleUserStatus = async (userId: number) => {
+        try {
+            await updateUserStatus(userId);
+            setUsers(prevUsers =>
+                prevUsers.map(user =>
+                    user.id === userId ? { ...user, isActiveUser: !user.isActiveUser } : user
+                )
+            );
+        } catch (error) {
+            console.error('Failed to toggle user status', error);
+        }
+    };
 
     const renderTableBody = () => {
         return users.map(user => {
@@ -82,6 +95,15 @@ const UserDetailsTable = () => {
                     </TableCell>
                     <TableCell>{user.username}</TableCell>
                     <TableCell>{user.email}</TableCell>
+                    {currentUserRole === 'admin' && (
+                        <TableCell>
+                            <Switch
+                                checked={user.isActiveUser}
+                                color="success"
+                                onChange={() => handleToggleUserStatus(user.id)}
+                            />
+                        </TableCell>
+                    )}
                     {currentUserRole === 'admin' && (
                         <TableCell>
                             <IconButton onClick={() => handleEdit(user.id)} aria-label="edit" color="primary">
@@ -108,6 +130,7 @@ const UserDetailsTable = () => {
                             <TableCell>Profile Image</TableCell>
                             <TableCell>Username</TableCell>
                             <TableCell>Email</TableCell>
+                            {currentUserRole === 'admin' && <TableCell>Status</TableCell>}
                             {currentUserRole === 'admin' && <TableCell>Action</TableCell>}
                         </TableRow>
                     </TableHead>

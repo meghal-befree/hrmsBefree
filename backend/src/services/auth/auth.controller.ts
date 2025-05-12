@@ -10,7 +10,7 @@ import {
   UsePipes,
   UploadedFile,
   Res,
-  UseGuards,
+  UseGuards, Patch, ParseIntPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, SignupDto, UpdateUserDto } from '../../dtos/login.dto';
@@ -82,6 +82,12 @@ export class AuthController {
   @Put('user/:id/toggle-active')
   async toggleActive(@Param('id') id: string) {
     return this.authService.toggleUserActiveStatus(Number(id));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('user/:id/soft-delete')
+  async softDeleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.authService.softDeleteUser(Number(id));
   }
 
   @UseGuards(JwtAuthGuard)

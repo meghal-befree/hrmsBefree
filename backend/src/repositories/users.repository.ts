@@ -24,8 +24,11 @@ export class UsersRepository {
     const transformUsers = (users: any[]) =>
       users.map(({ password, ...rest }) => rest); // Remove 'password'
 
+    const whereCondition = { isDeleted: false };
+
     if (page && limit) {
       const [data, total] = await this.repo.findAndCount({
+        where: whereCondition,
         skip: (page - 1) * limit,
         take: limit,
         order: { id: 'DESC' },
@@ -40,7 +43,10 @@ export class UsersRepository {
     }
 
     // Return all users if no pagination is requested
-    const data = await this.repo.find({ order: { id: 'DESC' } });
+    const data = await this.repo.find({
+      where: whereCondition,
+      order: { id: 'DESC' },
+    });
     return {
       data: transformUsers(data),
       total: data.length,
@@ -68,6 +74,10 @@ export class UsersRepository {
   }
 
   async toggleUserActiveStatus(user: Partial<User>): Promise<User> {
+    return this.repo.save(user);
+  }
+
+  async softDeleteUser(user: Partial<User>): Promise<User> {
     return this.repo.save(user);
   }
 }
