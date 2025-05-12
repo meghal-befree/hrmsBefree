@@ -27,8 +27,7 @@ export class AuthController {
   constructor(
     private readonly pdfService: PdfService,
     private readonly authService: AuthService,
-  ) {
-  }
+  ) {}
 
   @Post('signup')
   async signup(@Body() signupDto: SignupDto) {
@@ -77,6 +76,12 @@ export class AuthController {
       message: ['User updated successfully'],
       data: result,
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('user/:id/toggle-active')
+  async toggleActive(@Param('id') id: string) {
+    return this.authService.toggleUserActiveStatus(Number(id));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -160,7 +165,10 @@ export class AuthController {
     XLSX.utils.book_append_sheet(wb, ws, 'Users');
 
     // Generate the Excel file as a buffer
-    const fileBuffer: Buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+    const fileBuffer: Buffer = XLSX.write(wb, {
+      bookType: 'xlsx',
+      type: 'buffer',
+    });
 
     // Set the response headers for file download
     res.set({

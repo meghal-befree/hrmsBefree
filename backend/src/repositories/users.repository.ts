@@ -66,4 +66,8 @@ export class UsersRepository {
       email: updatedUser.email,
     };
   }
+
+  async toggleUserActiveStatus(user: Partial<User>): Promise<User> {
+    return this.repo.save(user);
+  }
 }

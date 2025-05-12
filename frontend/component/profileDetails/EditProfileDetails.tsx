@@ -1,15 +1,23 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
-    Container, Button, Typography, Box, CircularProgress, InputLabel, Input as MuiInput
+    Container,
+    Button,
+    Typography,
+    Box,
+    CircularProgress,
+    InputLabel,
+    Input as MuiInput
 } from '@mui/material';
 import Input from '../form/Input';
 import { getUserById, updateUser } from '../../api/auth';
 import { getLocalStorageUserId } from '../utils/util.ts';
 
 const EditUser = () => {
-    const id = getLocalStorageUserId();
+    const { id } = useParams(); // only exists if admin accesses /edit/:id
+    const userId = id ?? getLocalStorageUserId();
+
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [formValues, setFormValues] = useState({ username: '', email: '' });
@@ -18,7 +26,7 @@ const EditUser = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await getUserById(Number(id));
+                const res = await getUserById(Number(userId));
                 const user = res.data;
                 setFormValues({ username: user.username, email: user.email });
             } catch (err) {
@@ -28,8 +36,8 @@ const EditUser = () => {
             }
         };
 
-        if (id) fetchUser();
-    }, [id]);
+        if (userId) fetchUser();
+    }, [userId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormValues(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -52,7 +60,7 @@ const EditUser = () => {
         }
 
         try {
-            await updateUser(Number(id), formData);
+            await updateUser(Number(userId), formData);
             navigate('/');
         } catch (err) {
             console.error('Update failed', err);

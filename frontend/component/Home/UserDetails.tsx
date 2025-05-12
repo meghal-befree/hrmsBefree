@@ -8,6 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getUsersInformation } from '../../api/auth.ts';
 import {getLocalStorageIsAdmin} from "../utils/util.ts";
+import {useNavigate} from "react-router-dom";
 
 interface User {
     id: number;
@@ -22,6 +23,7 @@ const UserDetailsTable = () => {
     const [page, setPage] = useState(0); // 0-based index for TablePagination
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [totalCount, setTotalCount] = useState(0);
+    const navigate = useNavigate();
 
     const currentUserRole = getLocalStorageIsAdmin() ? 'admin' : 'user';
 
@@ -57,10 +59,12 @@ const UserDetailsTable = () => {
 
     const handleEdit = (id: number) => {
         console.log('Edit', id);
+        navigate(`/edit/${id}`)
     }
 
     const handleDelete = (id: number) => {
         console.log('Delete', id);
+        navigate(`/delete/${id}`)
     }
 
     const renderTableBody = () => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Container, Button, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import Input from '../form/Input';
@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState('');
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -20,8 +22,10 @@ const Login = () => {
             localStorage.setItem('user', JSON.stringify(response.data));
             navigate('/');
         } catch (error) {
-            console.error('Login error:', error);
-            alert('Invalid email or password');
+            const message =
+                error?.response?.data?.message ??
+                (typeof error === 'string' ? error : 'Unknown error');
+            setErrorMessage(message);
         }
     };
 
@@ -33,6 +37,11 @@ const Login = () => {
             <Button type="submit" variant="contained" color="primary" fullWidth>
                 Login
             </Button>
+            {errorMessage && (
+                <Typography color="error" variant="body2">
+                    {errorMessage}
+                </Typography>
+            )}
             <Typography align="center">
                 Don't have an account? <Link to="/signup">Sign up</Link>
             </Typography>
