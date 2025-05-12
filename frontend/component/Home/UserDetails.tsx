@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import {
     Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Paper, CircularProgress,
-    Box, Typography, TablePagination, Avatar
+    Box, Typography, TablePagination, Avatar, IconButton
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { getUsersInformation } from '../../api/auth.ts';
+import {getLocalStorageIsAdmin} from "../utils/util.ts";
 
 interface User {
     id: number;
@@ -19,6 +22,8 @@ const UserDetailsTable = () => {
     const [page, setPage] = useState(0); // 0-based index for TablePagination
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [totalCount, setTotalCount] = useState(0);
+
+    const currentUserRole = getLocalStorageIsAdmin() ? 'admin' : 'user';
 
     const fetchUsersInformation = async (currentPage = 0, limit = 5) => {
         setLoading(true);
@@ -50,11 +55,16 @@ const UserDetailsTable = () => {
         return <Box display="flex" justifyContent="center"><CircularProgress /></Box>;
     }
 
+    const handleEdit = (id: number) => {
+        console.log('Edit', id);
+    }
+
+    const handleDelete = (id: number) => {
+        console.log('Delete', id);
+    }
+
     const renderTableBody = () => {
         return users.map(user => {
-            console.log(user);
-            console.log(user.image);
-            console.log(`http://localhost:3000${user.image}`);
             return (
                 <TableRow key={user.id}>
                     <TableCell>{user.id}</TableCell>
@@ -68,6 +78,16 @@ const UserDetailsTable = () => {
                     </TableCell>
                     <TableCell>{user.username}</TableCell>
                     <TableCell>{user.email}</TableCell>
+                    {currentUserRole === 'admin' && (
+                        <TableCell>
+                            <IconButton onClick={() => handleEdit(user.id)} aria-label="edit" color="primary">
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={() => handleDelete(user.id)} aria-label="delete" color="error">
+                                <DeleteIcon />
+                            </IconButton>
+                        </TableCell>
+                    )}
                 </TableRow>
             )
         });
@@ -84,6 +104,7 @@ const UserDetailsTable = () => {
                             <TableCell>Profile Image</TableCell>
                             <TableCell>Username</TableCell>
                             <TableCell>Email</TableCell>
+                            {currentUserRole === 'admin' && <TableCell>Action</TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>

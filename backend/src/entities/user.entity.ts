@@ -16,4 +16,7 @@ export class User {
 
   @Column({ default: '' })
   image?: string;
+
+  @Column({ default: false })
+  isAdmin?: boolean;
 }
