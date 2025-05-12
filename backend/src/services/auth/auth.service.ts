@@ -35,7 +35,11 @@ export class AuthService {
     return this.usersRepository.findByUsername(username);
   }
 
-  async createUser(username: string, email: string, password: string): Promise<User> {
+  async createUser(
+    username: string,
+    email: string,
+    password: string,
+  ): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user: Partial<User> = {
       username,
@@ -45,7 +49,7 @@ export class AuthService {
     return this.usersRepository.save(user);
   }
 
-  async findAllUser(page: number, limit: number) {
+  async findAllUser(page?: number, limit?: number) {
     return this.usersRepository.findAllUser(page, limit);
   }
 
@@ -53,7 +57,10 @@ export class AuthService {
     return this.usersRepository.findByUserId(id);
   }
 
-  async updateUser(id: number, updateData: { username?: string; email?: string; image?: string }) {
+  async updateUser(
+    id: number,
+    updateData: { username?: string; email?: string; image?: string },
+  ) {
     const user = await this.usersRepository.findByUserId(id);
 
     if (!user) {
@@ -63,13 +70,13 @@ export class AuthService {
     // 🧹 Delete old image if new image is uploaded
     if (updateData.image && user.image) {
       const oldImagePath = path.join(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          'uploads',
-          'users',
-          path.basename(user.image),
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'uploads',
+        'users',
+        path.basename(user.image),
       );
 
       if (fs.existsSync(oldImagePath)) {
