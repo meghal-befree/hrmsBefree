@@ -20,18 +20,32 @@ export class UsersRepository {
     return this.repo.findOne({ where: { username } });
   }
 
-  async findAllUser(page = 1, limit = 10) {
-    const [data, total] = await this.repo.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { id: 'DESC' },
-    });
+  async findAllUser(page?: number, limit?: number) {
+    const transformUsers = (users: any[]) =>
+      users.map(({ password, ...rest }) => rest); // Remove 'password'
 
+    if (page && limit) {
+      const [data, total] = await this.repo.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        order: { id: 'DESC' },
+      });
+
+      return {
+        data: transformUsers(data),
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+      };
+    }
+
+    // Return all users if no pagination is requested
+    const data = await this.repo.find({ order: { id: 'DESC' } });
     return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
+      data: transformUsers(data),
+      total: data.length,
+      page: 1,
+      lastPage: 1,
     };
   }
 

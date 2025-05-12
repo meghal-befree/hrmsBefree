@@ -37,6 +37,23 @@ export const downloadUserPdf = async (page?: number, limit?: number) => {
     );
 };
 
+export const downloadUserExcel = async (page?: number, limit?: number) => {
+    const queryParams = [];
+
+    if (page) queryParams.push(`page=${page}`);
+    if (limit) queryParams.push(`limit=${limit}`);
+
+    const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
+    return http.post(
+        `/auth/users/csv-download${queryString}`,
+        {},
+        {
+            responseType: 'blob',
+            withCredentials: true,
+        }
+    );
+};
 export const getUserById = async (id: number) => {
     return http.get(`/auth/users/${id}`);
 };

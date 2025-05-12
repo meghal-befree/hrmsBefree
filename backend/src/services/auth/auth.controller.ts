@@ -11,8 +11,6 @@ import {
   UploadedFile,
   Res,
   UseGuards,
-  DefaultValuePipe,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, SignupDto, UpdateUserDto } from '../../dtos/login.dto';
@@ -22,13 +20,15 @@ import { JwtAuthGuard } from '../../jwt/jwt-auth.guard';
 import { Express, Response } from 'express';
 import { UploadFileInterceptor } from '../../utils/file-upload.util';
 import { PdfService } from '../pdf/pdf.service';
+import * as XLSX from 'xlsx';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly pdfService: PdfService,
     private readonly authService: AuthService,
-  ) {}
+  ) {
+  }
 
   @Post('signup')
   async signup(@Body() signupDto: SignupDto) {
@@ -82,14 +82,29 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('users/download-pdf')
   async downloadPdf(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    const result = await this.authService.findAllUser(page, limit);
-    const users = result.data;
+    let users;
 
-    if (users.length === 0) {
+    if (page && limit) {
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+
+      if (isNaN(pageNum) || isNaN(limitNum)) {
+        return res.status(400).json({ message: 'Invalid page or limit' });
+      }
+
+      const result = await this.authService.findAllUser(pageNum, limitNum);
+      users = result.data;
+    } else {
+      // Fetch all users (no pagination)
+      const result = await this.authService.findAllUser(); // default to all
+      users = result.data;
+    }
+
+    if (!users || users.length === 0) {
       return res.status(404).json({
         statusCode: 404,
         message: 'User not found',
@@ -100,9 +115,61 @@ export class AuthController {
 
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="user-profile.pdf"',
+      'Content-Disposition': 'attachment; filename="user-list.pdf"',
     });
 
     res.send(pdfBuffer);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('users/csv-download')
+  async downloadCsv(
+    @Res() res: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    let users;
+
+    if (page && limit) {
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+
+      if (isNaN(pageNum) || isNaN(limitNum)) {
+        return res.status(400).json({ message: 'Invalid page or limit' });
+      }
+
+      const result = await this.authService.findAllUser(pageNum, limitNum);
+      users = result.data;
+    } else {
+      const result = await this.authService.findAllUser(); // Fetch all users
+      users = result.data;
+    }
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: 'No users found',
+      });
+    }
+
+    // Create the XLSX worksheet
+    const ws = XLSX.utils.json_to_sheet(users);
+
+    // Create a workbook and append the worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Users');
+
+    // Generate the Excel file as a buffer
+    const fileBuffer: Buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+
+    // Set the response headers for file download
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="users.xlsx"',
+    });
+
+    // Send the file as a response
+    res.send(fileBuffer);
   }
 }

@@ -49,7 +49,7 @@ export class AuthService {
     return this.usersRepository.save(user);
   }
 
-  async findAllUser(page: number, limit: number) {
+  async findAllUser(page?: number, limit?: number) {
     return this.usersRepository.findAllUser(page, limit);
   }
 
