@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
 import './home.scss';
-import UserDetailsTable from "./UserDetails.tsx";
 import {downloadUserExcel, downloadUserPdf} from "../../api/auth.ts";
 
 const Home = () => {
@@ -91,14 +90,9 @@ const Home = () => {
        </Box>
     </Box>
 
-    const renderTable = () => <Box className="tableContainer">
-        <UserDetailsTable />
-    </Box>
-
     return (
         <Box className="homeContainer">
             {renderHeader()}
-            {renderTable()}
         </Box>
     );
 };
