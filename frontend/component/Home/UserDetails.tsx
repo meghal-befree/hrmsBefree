@@ -6,9 +6,11 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {getUsersInformation, updateUserStatus} from '../../api/auth.ts';
+import {getUsersInformation, softDeleteUser, updateUserStatus} from '../../api/auth.ts';
 import {getLocalStorageIsAdmin} from "../utils/util.ts";
 import {useNavigate} from "react-router-dom";
+import ConfirmModal from "../modal/ConfirmModal.tsx";
+import { toast } from 'react-toastify';
 
 interface User {
     id: number;
@@ -24,6 +26,9 @@ const UserDetailsTable = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [totalCount, setTotalCount] = useState(0);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState<'delete' | 'status'>('delete');
+    const [selectedId, setSelectedId] = useState<number | null>(null);
 
     const navigate = useNavigate();
 
@@ -52,7 +57,7 @@ const UserDetailsTable = () => {
 
     const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0); // Reset to first page when rows per page changes
+        setPage(0);
     };
 
     if (loading) {
@@ -64,20 +69,46 @@ const UserDetailsTable = () => {
     }
 
     const handleDelete = (id: number) => {
-        navigate(`/delete/${id}`)
+        setSelectedId(id);
+        setModalType('delete');
+        setModalOpen(true);
     }
 
-    const handleToggleUserStatus = async (userId: number) => {
-        try {
-            await updateUserStatus(userId);
-            setUsers(prevUsers =>
-                prevUsers.map(user =>
-                    user.id === userId ? { ...user, isActiveUser: !user.isActiveUser } : user
-                )
-            );
-        } catch (error) {
-            console.error('Failed to toggle user status', error);
+    const handleStatusChange = (id: number) => {
+        setSelectedId(id);
+        setModalType('status');
+        setModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (selectedId !== null) {
+            try {
+                if (modalType === 'delete') {
+                    const res = await softDeleteUser(selectedId);
+                    toast.success(res.data.message);
+                    await fetchUsersInformation(page, rowsPerPage);
+                } else {
+                    await updateUserStatus(selectedId);
+                    await updateUserStatus(selectedId);
+                    setUsers(prevUsers =>
+                        prevUsers.map(user =>
+                            user.id === selectedId ? { ...user, isActiveUser: !user.isActiveUser } : user
+                        )
+                    );
+                    toast.success('User status updated successfully');
+                }
+            } catch (err) {
+                console.error('Error ->', err);
+                toast.error(modalType === "delete" ? 'Failed to delete user. Please try again later.' : 'Failed to update user status. Please try again later.');
+            } finally {
+                handleClose();
+            }
         }
+    };
+
+    const handleClose = () => {
+        setModalOpen(false);
+        setSelectedId(null);
     };
 
     const renderTableBody = () => {
@@ -100,7 +131,7 @@ const UserDetailsTable = () => {
                             <Switch
                                 checked={user.isActiveUser}
                                 color="success"
-                                onChange={() => handleToggleUserStatus(user.id)}
+                                onChange={() => handleStatusChange(user.id)}
                             />
                         </TableCell>
                     )}
@@ -148,6 +179,17 @@ const UserDetailsTable = () => {
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleRowsPerPageChange}
                 rowsPerPageOptions={[5, 10, 25]}
+            />
+            <ConfirmModal
+                open={modalOpen}
+                onClose={handleClose}
+                onConfirm={handleConfirmDelete}
+                title={modalType === 'delete' ? 'Confirm Delete' : 'Confirm Status Change'}
+                description={modalType === 'delete'
+                    ? 'Are you sure you want to delete this user?'
+                    : 'Are you sure you want to change the status of this user?'}
+                actionButtonName={modalType === 'delete' ? 'Delete' : 'Change'}
+                actionButtonColor={modalType === 'delete' ? 'error' : 'primary'}
             />
         </Box>
     );

@@ -63,7 +63,7 @@ const Home = () => {
                onClick={handleEditProfile}
                sx={{ mr: 2 }}
            >
-               Edit Profile
+               Add Profile
            </Button>
            <Button
                variant="contained"

@@ -11,18 +11,16 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    // one way using Repository methods
     return this.repo.findOne({ where: { email } });
   }
 
   async findByUsername(username: string): Promise<User | null> {
-    // one way using Repository methods
     return this.repo.findOne({ where: { username } });
   }
 
   async findAllUser(page?: number, limit?: number) {
     const transformUsers = (users: any[]) =>
-      users.map(({ password, ...rest }) => rest); // Remove 'password'
+      users.map(({ password, ...rest }) => rest);
 
     const whereCondition = { isDeleted: false };
 
@@ -42,7 +40,6 @@ export class UsersRepository {
       };
     }
 
-    // Return all users if no pagination is requested
     const data = await this.repo.find({
       where: whereCondition,
       order: { id: 'DESC' },

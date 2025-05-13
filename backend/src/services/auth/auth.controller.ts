@@ -10,7 +10,9 @@ import {
   UsePipes,
   UploadedFile,
   Res,
-  UseGuards, Patch, ParseIntPipe,
+  UseGuards,
+  Patch,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, SignupDto, UpdateUserDto } from '../../dtos/login.dto';
@@ -20,7 +22,7 @@ import { JwtAuthGuard } from '../../jwt/jwt-auth.guard';
 import { Express, Response } from 'express';
 import { UploadFileInterceptor } from '../../utils/file-upload.util';
 import { PdfService } from '../pdf/pdf.service';
-import * as XLSX from 'xlsx';
+import { Workbook } from 'exceljs';
 
 @Controller('auth')
 export class AuthController {
@@ -152,7 +154,7 @@ export class AuthController {
       const result = await this.authService.findAllUser(pageNum, limitNum);
       users = result.data;
     } else {
-      const result = await this.authService.findAllUser(); // Fetch all users
+      const result = await this.authService.findAllUser();
       users = result.data;
     }
 
@@ -163,27 +165,48 @@ export class AuthController {
       });
     }
 
-    // Create the XLSX worksheet
-    const ws = XLSX.utils.json_to_sheet(users);
+    // Transform user data
+    const transformedUsers = users.map((user) => ({
+      ID: user.id,
+      Username: user.username,
+      Email: user.email,
+      Image: user.image || 'N/A',
+      Active: user.isActiveUser ? 'Yes' : 'No',
+    }));
 
-    // Create a workbook and append the worksheet
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Users');
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Users');
 
-    // Generate the Excel file as a buffer
-    const fileBuffer: Buffer = XLSX.write(wb, {
-      bookType: 'xlsx',
-      type: 'buffer',
+    // Add header row
+    const headers = Object.keys(transformedUsers[0]);
+    worksheet.addRow(headers);
+
+    // Add user data
+    transformedUsers.forEach((user) => {
+      worksheet.addRow(Object.values(user));
     });
 
-    // Set the response headers for file download
-    res.set({
-      'Content-Type':
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': 'attachment; filename="users.xlsx"',
+    // Apply styling to header
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFFF00' }, // Yellow background
+      };
+      cell.alignment = { horizontal: 'center' };
     });
 
-    // Send the file as a response
-    res.send(fileBuffer);
+    // Set the response headers
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', 'attachment; filename="users.xlsx"');
+
+    // Write file to buffer and send
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.send(buffer);
   }
 }
