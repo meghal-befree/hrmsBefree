@@ -1,4 +1,4 @@
-const getParsedUser = () => {
+export const getParsedUser = () => {
     const user = localStorage.getItem('user');
     if (!user) return null;
 

@@ -1,21 +1,22 @@
 import * as React from 'react';
-import { createTheme } from '@mui/material';
+import { createTheme, CssBaseline } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { AppProvider, type Navigation } from '@toolpad/core/AppProvider';
+import { AppProvider, type Navigation, type Session } from '@toolpad/core/AppProvider';
 import { DashboardLayout as CoreLayout } from '@toolpad/core/DashboardLayout';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { getParsedUser } from "../component/utils/util.ts";
+
+import { SidebarFooterAccount } from './SidebarFooterAccount';
 
 const NAVIGATION: Navigation = [
     {
-        segment: 'User',
-        title: 'user',
-        icon: <DashboardIcon />,
+        kind: 'header',
+        title: 'User Management',
     },
     {
-        segment: 'orders',
-        title: 'Orders',
-        icon: <ShoppingCartIcon />,
+        segment: 'user',
+        title: 'User',
+        icon: <DashboardIcon />,
     },
 ];
 
@@ -36,17 +37,60 @@ const theme = createTheme({
 });
 
 const DashboardLayout = () => {
+    const navigate = useNavigate();
+
+    const parsedUser = getParsedUser();
+    const [session, setSession] = React.useState<Session | null>(parsedUser ? {
+        user: {
+            name: parsedUser.user.username,
+            email: parsedUser.user.email,
+            image: `http://localhost:3000${parsedUser.user.image}`,
+        },
+    } : null);
+
+    const authentication = React.useMemo(() => {
+        return {
+            signIn: () => {
+                setSession({
+                    user: {
+                        name: parsedUser.user.username,
+                        email: parsedUser.user.email,
+                        image: `http://localhost:3000${parsedUser.user.image}`,
+                    },
+                });
+            },
+            signOut: () => {
+                setSession(null);
+                localStorage.removeItem('user');
+                navigate('/login');
+            },
+        };
+    }, [navigate, parsedUser]);
+
     return (
         <AppProvider
+            session={session}
+            // authentication={authentication} // if use in top level app
             navigation={NAVIGATION}
             branding={{
-                logo: <img src="https://mui.com/static/logo.png" alt="MUI logo" height={24} />,
-                title: 'HRMS Befree',
+                logo: (
+                    <img
+                        src="https://befree.xecurify.com/moas/images/solution-logos/customapp.png"
+                        alt="MUI logo"
+                        height={24}
+                    />
+                ),
+                title: 'HRMS befree',
                 homeUrl: '/',
             }}
             theme={theme}
         >
-            <CoreLayout>
+            <CssBaseline />
+            <CoreLayout
+                slots={{
+                    sidebarFooter: SidebarFooterAccount,
+                }}
+            >
                 <Outlet />
             </CoreLayout>
         </AppProvider>
