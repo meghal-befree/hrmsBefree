@@ -1,10 +1,20 @@
 import { Navigate } from 'react-router-dom';
 import type { JSX } from "react";
-import {getLocalStorageToken} from "../utils/util.ts";
+import { getLocalStorageToken, getLocalStorageIsAdmin } from '../utils/util';
 
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+const PrivateRoute = ({ children, adminOnly = false }: { children: JSX.Element, adminOnly?: boolean }) => {
     const token = getLocalStorageToken();
-    return token ? children : <Navigate to="/login" />;
+    const isAdmin = getLocalStorageIsAdmin();
+
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (adminOnly && !isAdmin) {
+        return <Navigate to="/" replace />;
+    }
+
+    return children;
 };
 
 export default PrivateRoute;

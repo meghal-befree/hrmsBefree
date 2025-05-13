@@ -28,6 +28,15 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 }
             />
+
+            <Route
+                path="/edit/:id"
+                element={
+                    <PrivateRoute adminOnly>
+                        <EditUser />
+                    </PrivateRoute>
+                }
+            />
         </Routes>
     );
 };

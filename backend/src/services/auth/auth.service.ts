@@ -15,9 +15,29 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersRepository.findByEmail(email);
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (!user) {
+      throw new UnauthorizedException({ message: 'User not found' });
     }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException({ message: 'Incorrect username or password' });
+    }
+
+    if (!user.isActiveUser) {
+      throw new UnauthorizedException({
+        message:
+          'Your account is deactivated. Please contact support Team for more details.',
+      });
+    }
+
+    if (user.isDeleted) {
+      throw new UnauthorizedException({
+        message:
+          'Your account is deleted. Please contact support Team for more details.',
+      });
+    }
+
     const { password: _, ...result } = user;
     return result;
   }
@@ -53,8 +73,28 @@ export class AuthService {
     return this.usersRepository.findAllUser(page, limit);
   }
 
+  async toggleUserActiveStatus(id: number) {
+    const user = await this.usersRepository.findByUserId(id);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.isActiveUser = !user.isActiveUser;
+    return this.usersRepository.toggleUserActiveStatus(user);
+  }
+
   async findByUserId(id: number) {
     return this.usersRepository.findByUserId(id);
+  }
+
+  async softDeleteUser(id: number) {
+    const user = await this.usersRepository.findByUserId(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.isDeleted = true;
+    await this.usersRepository.softDeleteUser(user);
+    return { message: 'User soft deleted successfully' };
   }
 
   async updateUser(

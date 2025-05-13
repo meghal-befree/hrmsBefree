@@ -1,25 +1,26 @@
-export const getLocalStorageToken = () => {
+const getParsedUser = () => {
     const user = localStorage.getItem('user');
     if (!user) return null;
 
     try {
-        const parsedUser = JSON.parse(user);
-        return parsedUser.access_token;
+        return JSON.parse(user);
     } catch (e) {
         console.error('Failed to parse user from localStorage', e);
         return null;
     }
 };
 
-export const getLocalStorageUserId = () => {
-    const user = localStorage.getItem('user');
-    if (!user) return null;
+export const getLocalStorageToken = () => {
+    const parsedUser = getParsedUser();
+    return parsedUser?.access_token ?? null;
+};
 
-    try {
-        const parsedUser = JSON.parse(user);
-        return parsedUser.user.id;
-    } catch (e) {
-        console.error('Failed to parse user from localStorage', e);
-        return null;
-    }
+export const getLocalStorageUserId = () => {
+    const parsedUser = getParsedUser();
+    return parsedUser?.user?.id ?? null;
+};
+
+export const getLocalStorageIsAdmin = () => {
+    const parsedUser = getParsedUser();
+    return parsedUser?.user?.isAdmin ?? null;
 };

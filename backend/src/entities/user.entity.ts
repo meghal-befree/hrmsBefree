@@ -16,4 +16,13 @@ export class User {
 
   @Column({ default: '' })
   image?: string;
+
+  @Column({ default: false })
+  isAdmin?: boolean;
+
+  @Column({ default: true })
+  isActiveUser: boolean;
+
+  @Column({ default: false })
+  isDeleted: boolean;
 }

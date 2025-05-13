@@ -54,7 +54,16 @@ export const downloadUserExcel = async (page?: number, limit?: number) => {
         }
     );
 };
+
 export const getUserById = async (id: number) => {
     return http.get(`/auth/users/${id}`);
 };
+
+export const updateUserStatus = async (id: number) => {
+    return http.put(`/auth/user/${id}/toggle-active`);
+}
+
+export const softDeleteUser = async (id: number) => {
+    return http.patch(`/auth/user/${id}/soft-delete`);
+}
 
