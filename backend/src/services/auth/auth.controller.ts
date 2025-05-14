@@ -48,10 +48,16 @@ export class AuthController {
   async findAll(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
+    @Query('name') name?: string,
+    @Query('email') email?: string,
   ): Promise<any> {
-    return this.authService.findAllUser(Number(page), Number(limit));
+    return this.authService.findAllUser(
+      Number(page),
+      Number(limit),
+      name,
+      email,
+    );
   }
-
   @UseGuards(JwtAuthGuard)
   @Get('users/:id')
   async findOne(@Param('id') id: string) {

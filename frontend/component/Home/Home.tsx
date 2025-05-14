@@ -1,20 +1,8 @@
-import { useNavigate } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
 import './home.scss';
-import UserDetailsTable from "./UserDetails.tsx";
 import {downloadUserExcel, downloadUserPdf} from "../../api/auth.ts";
 
 const Home = () => {
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.removeItem('user');
-        navigate('/login');
-    };
-
-    const handleEditProfile = () => {
-        navigate('/edit');
-    };
 
     const handlePdfDownload = async () => {
         try {
@@ -60,14 +48,6 @@ const Home = () => {
            <Button
                variant="contained"
                color="secondary"
-               onClick={handleEditProfile}
-               sx={{ mr: 2 }}
-           >
-               Add Profile
-           </Button>
-           <Button
-               variant="contained"
-               color="secondary"
                onClick={handlePdfDownload}
                sx={{ mr: 2 }}
            >
@@ -81,24 +61,12 @@ const Home = () => {
            >
                Excel Download
            </Button>
-           <Button
-               variant="contained"
-               color="secondary"
-               onClick={handleLogout}
-           >
-               Logout
-           </Button>
        </Box>
-    </Box>
-
-    const renderTable = () => <Box className="tableContainer">
-        <UserDetailsTable />
     </Box>
 
     return (
         <Box className="homeContainer">
             {renderHeader()}
-            {renderTable()}
         </Box>
     );
 };

@@ -1,9 +1,12 @@
+// AppRoutes.tsx
 import { Routes, Route } from 'react-router-dom';
 import Login from '../component/Auth/Login';
 import Signup from '../component/Auth/Signup';
-import Home from '../component/Home/Home.tsx';
-import PrivateRoute from '../component/privateRoute/PrivateRoute.tsx';
-import EditUser from "../component/profileDetails/EditProfileDetails.tsx";
+import PrivateRoute from '../component/privateRoute/PrivateRoute';
+import EditUser from '../component/profileDetails/EditProfileDetails';
+import UserDetailsTable from '../component/Home/UserDetails';
+import DashboardLayout from '../Layout/DashboardLayout';
+import Home from '../component/Home/Home';
 
 const AppRoutes = () => {
     return (
@@ -11,32 +14,36 @@ const AppRoutes = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
+            {/* Protected Dashboard Layout with Nested Routes */}
             <Route
                 path="/"
                 element={
                     <PrivateRoute>
-                        <Home />
+                        <DashboardLayout />
                     </PrivateRoute>
                 }
-            />
+            >
+                {/* Default dashboard route */}
+                <Route index element={<Home />} />
 
-            <Route
-                path="/edit"
-                element={
+                {/* Nested routes */}
+                <Route path="user" element={
+                    <PrivateRoute>
+                        <UserDetailsTable />
+                    </PrivateRoute>
+                } />
+                <Route path="edit" element={
                     <PrivateRoute>
                         <EditUser />
                     </PrivateRoute>
-                }
-            />
-
-            <Route
-                path="/edit/:id"
-                element={
-                    <PrivateRoute adminOnly>
+                } />
+                <Route path="edit/:id" element={
+                    <PrivateRoute adminOnly={true}>
                         <EditUser />
                     </PrivateRoute>
-                }
-            />
+                    }
+                />
+            </Route>
         </Routes>
     );
 };

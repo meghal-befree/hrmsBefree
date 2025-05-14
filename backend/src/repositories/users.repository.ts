@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { User } from '../entities/user.entity';
 
 @Injectable()
@@ -18,11 +18,23 @@ export class UsersRepository {
     return this.repo.findOne({ where: { username } });
   }
 
-  async findAllUser(page?: number, limit?: number) {
+  async findAllUser(
+    page?: number,
+    limit?: number,
+    name?: string,
+    email?: string,
+  ) {
     const transformUsers = (users: any[]) =>
       users.map(({ password, ...rest }) => rest);
 
-    const whereCondition = { isDeleted: false };
+    const whereCondition: any = { isDeleted: false };
+    if (name) {
+      whereCondition.username = ILike(`%${name}%`);
+    }
+
+    if (email) {
+      whereCondition.email = ILike(`%${email}%`);
+    }
 
     if (page && limit) {
       const [data, total] = await this.repo.findAndCount({
