@@ -27,9 +27,22 @@ const AppRoutes = () => {
                 <Route index element={<Home />} />
 
                 {/* Nested routes */}
-                <Route path="user" element={<UserDetailsTable />} />
-                <Route path="edit" element={<EditUser />} />
-                <Route path="edit/:id" element={<EditUser />} />
+                <Route path="user" element={
+                    <PrivateRoute>
+                        <UserDetailsTable />
+                    </PrivateRoute>
+                } />
+                <Route path="edit" element={
+                    <PrivateRoute>
+                        <EditUser />
+                    </PrivateRoute>
+                } />
+                <Route path="edit/:id" element={
+                    <PrivateRoute adminOnly={true}>
+                        <EditUser />
+                    </PrivateRoute>
+                    }
+                />
             </Route>
         </Routes>
     );
