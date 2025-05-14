@@ -69,8 +69,8 @@ export class AuthService {
     return this.usersRepository.save(user);
   }
 
-  async findAllUser(page?: number, limit?: number) {
-    return this.usersRepository.findAllUser(page, limit);
+  async findAllUser(page?: number, limit?: number, name?: string, email?: string) {
+    return this.usersRepository.findAllUser(page, limit, name, email);
   }
 
   async toggleUserActiveStatus(id: number) {

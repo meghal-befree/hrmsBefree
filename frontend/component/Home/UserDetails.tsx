@@ -152,7 +152,7 @@ const UserDetailsTable = () => {
 
 
 
-    const handleConfirmDelete = async () => {
+    const handleConfirm = async () => {
         if (selectedId !== null) {
             try {
                 if (modalType === 'delete') {
@@ -160,7 +160,6 @@ const UserDetailsTable = () => {
                     toast.success(res.data.message);
                     await fetchUsersInformation(page, rowsPerPage);
                 } else {
-                    await updateUserStatus(selectedId);
                     await updateUserStatus(selectedId);
                     setUsers(prevUsers =>
                         prevUsers.map(user =>
@@ -225,7 +224,6 @@ const UserDetailsTable = () => {
     return (
         <Box mt={5} p={2} sx={{ width: '100%' }}>
             <Typography variant="h5" align="center" mb={2}>User List</Typography>
-            <hr />
             <Paper elevation={2} sx={{ p: 2, mb: 3 }} variant="outlined">
                 {renderFilter()}
             </Paper>
@@ -259,7 +257,7 @@ const UserDetailsTable = () => {
             <ConfirmModal
                 open={modalOpen}
                 onClose={handleClose}
-                onConfirm={handleConfirmDelete}
+                onConfirm={handleConfirm}
                 title={modalType === 'delete' ? 'Confirm Delete' : 'Confirm Status Change'}
                 description={modalType === 'delete'
                     ? 'Are you sure you want to delete this user?'
