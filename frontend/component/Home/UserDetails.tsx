@@ -47,7 +47,7 @@ const UserDetailsTable = () => {
     const fetchUsersInformation = async (currentPage = 0, limit = 5,  name = '', email = '') => {
         setLoading(true);
         try {
-            const response = await getUsersInformation(currentPage + 1, limit); // convert to 1-based for API
+            const response = await getUsersInformation(currentPage + 1, limit, name, email); // convert to 1-based for API
             setUsers(response.data.data);
             setTotalCount(response.data.total);
         } catch (error) {

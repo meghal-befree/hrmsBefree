@@ -8,8 +8,20 @@ export const signupUser = async (data: { username: string; email: string; passwo
     return http.post('/auth/signup', data);
 };
 
-export const getUsersInformation = async (page = 1, limit = 5) => {
-    return http.get(`/auth/users?page=${page}&limit=${limit}`);
+export const getUsersInformation = async (
+    page = 1,
+    limit = 5,
+    name = '',
+    email = ''
+) => {
+    const params = new URLSearchParams();
+
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    if (name) params.append('name', name);
+    if (email) params.append('email', email);
+
+    return http.get(`/auth/users?${params.toString()}`);
 };
 
 export const updateUser = async (id: number, data: FormData) => {
