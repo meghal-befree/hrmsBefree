@@ -10,9 +10,9 @@ import {
     InputLabel,
     Input as MuiInput
 } from '@mui/material';
-import Input from '../form/Input';
-import { getUserById, updateUser } from '../../api/auth';
-import { getLocalStorageUserId } from '../utils/util.ts';
+import Input from '../../form/Input';
+import { getUserById, updateUser } from '../../../api/auth';
+import { getLocalStorageUserId } from '../../utils/util.ts';
 
 const EditUser = () => {
     const { id } = useParams(); // only exists if admin accesses /edit/:id
