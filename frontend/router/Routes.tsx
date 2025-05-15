@@ -3,8 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import Login from '../component/Auth/Login';
 import Signup from '../component/Auth/Signup';
 import PrivateRoute from '../component/privateRoute/PrivateRoute';
-import EditUser from '../component/profileDetails/EditProfileDetails';
-import UserDetailsTable from '../component/Home/UserDetails';
+import EditUser from '../component/Home/profileDetails/EditProfileDetails';
+import UserDetailsTable from '../component/Home/profileDetails/UserDetails.tsx';
 import DashboardLayout from '../Layout/DashboardLayout';
 import Home from '../component/Home/Home';
 

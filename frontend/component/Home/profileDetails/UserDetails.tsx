@@ -7,10 +7,10 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {getUsersInformation, softDeleteUser, updateUserStatus} from '../../api/auth.ts';
-import {getLocalStorageIsAdmin} from "../utils/util.ts";
+import {getUsersInformation, softDeleteUser, updateUserStatus} from '../../../api/auth.ts';
+import {getLocalStorageIsAdmin} from "../../utils/util.ts";
 import {useNavigate} from "react-router-dom";
-import ConfirmModal from "../modal/ConfirmModal.tsx";
+import ConfirmModal from "../../modal/ConfirmModal.tsx";
 import { toast } from 'react-toastify';
 
 interface User {
