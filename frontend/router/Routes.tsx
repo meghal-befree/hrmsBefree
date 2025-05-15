@@ -1,4 +1,3 @@
-// AppRoutes.tsx
 import { Routes, Route } from 'react-router-dom';
 import Login from '../component/Auth/Login';
 import Signup from '../component/Auth/Signup';
@@ -7,6 +6,8 @@ import EditUser from '../component/Home/profileDetails/EditProfileDetails';
 import UserDetailsTable from '../component/Home/profileDetails/UserDetails.tsx';
 import DashboardLayout from '../Layout/DashboardLayout';
 import Home from '../component/Home/Home';
+import Employee from "../component/employee/Employee.tsx";
+import EmployeeList from "../component/employee/EmployeeList.tsx";
 
 const AppRoutes = () => {
     return (
@@ -43,6 +44,19 @@ const AppRoutes = () => {
                     </PrivateRoute>
                     }
                 />
+                <Route path="employee/employee-form" element={
+                        <PrivateRoute adminOnly={true}>
+                            <Employee />
+                        </PrivateRoute>
+                    }
+                />
+                <Route path="employee/employee-list" element={
+                        <PrivateRoute>
+                            <EmployeeList />
+                        </PrivateRoute>
+                    }
+                />
+
             </Route>
         </Routes>
     );
