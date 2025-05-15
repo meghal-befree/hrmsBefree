@@ -79,3 +79,7 @@ export const softDeleteUser = async (id: number) => {
     return http.patch(`/auth/user/${id}/soft-delete`);
 }
 
+export const fetchAllUsers = async () => {
+    const response = await http.get(`/auth/users`);
+    return response.data.data;
+};

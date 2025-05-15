@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { createTheme, CssBaseline } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import BadgeIcon from '@mui/icons-material/Badge';
+import FolderIcon from '@mui/icons-material/Folder';
+import ListIcon from '@mui/icons-material/List';
 import { AppProvider, type Navigation, type Session } from '@toolpad/core/AppProvider';
 import { DashboardLayout as CoreLayout } from '@toolpad/core/DashboardLayout';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -18,7 +21,25 @@ const NAVIGATION: Navigation = [
         title: 'User',
         icon: <DashboardIcon />,
     },
-];
+    { kind: 'divider' },
+    {
+        segment: 'employee',
+        title: 'Employee',
+        icon: <FolderIcon />,
+        children: [
+            {
+                segment: 'employee-form',
+                title: 'Employee Form',
+                icon: <BadgeIcon />,
+            },
+            {
+                segment: 'employee-list',
+                title: 'Employee List',
+                icon: <ListIcon />,
+            },
+        ]
+    },
+]
 
 const theme = createTheme({
     cssVariables: {
@@ -48,24 +69,26 @@ const DashboardLayout = () => {
         },
     } : null);
 
-    const authentication = React.useMemo(() => {
-        return {
-            signIn: () => {
-                setSession({
-                    user: {
-                        name: parsedUser.user.username,
-                        email: parsedUser.user.email,
-                        image: `http://localhost:3000${parsedUser.user.image}`,
-                    },
-                });
-            },
-            signOut: () => {
-                setSession(null);
-                localStorage.removeItem('user');
-                navigate('/login');
-            },
-        };
-    }, [navigate, parsedUser]);
+    // if use in top level app
+
+    // const authentication = React.useMemo(() => {
+    //     return {
+    //         signIn: () => {
+    //             setSession({
+    //                 user: {
+    //                     name: parsedUser.user.username,
+    //                     email: parsedUser.user.email,
+    //                     image: `http://localhost:3000${parsedUser.user.image}`,
+    //                 },
+    //             });
+    //         },
+    //         signOut: () => {
+    //             setSession(null);
+    //             localStorage.removeItem('user');
+    //             navigate('/login');
+    //         },
+    //     };
+    // }, [navigate, parsedUser]);
 
     return (
         <AppProvider
