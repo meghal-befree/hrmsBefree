@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import {
+    DataGrid, type GridColumnGroupingModel,
+    GridToolbar,
+} from '@mui/x-data-grid';
 import { fetchAllUsers } from '../../../api/auth';
-import {IconButton} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import {columns} from "./columns.tsx";
 
 export function EmployeeTable() {
     const [data, setData] = React.useState([]);
@@ -27,42 +28,20 @@ export function EmployeeTable() {
         fetchData();
     }, []);
 
-    const columns = [
-        { field: 'id', headerName: 'ID', flex: 1, filterable: true, sortable: true },
-        { field: 'username', headerName: 'Name', flex: 2, filterable: true, sortable: true },
-        { field: 'email', headerName: 'Email', flex: 3, filterable: true, sortable: true },
+    const processRowUpdate = (newRow) => {
+        console.log('Updated Row:', newRow);
+        // Here, you can make an API call to persist the changes to the backend
+        return newRow;
+    };
+
+    const columnGroupingModel: GridColumnGroupingModel = [
         {
-            field: 'isActiveUser',
-            headerName: 'Status',
-            flex: 2,
-            filterable: true,
-            sortable: true,
-            renderCell: (params: any) => (params.value ? 'Active User' : 'Deactivated User'),
-        },
-        {
-            field: 'actions',
-            headerName: 'Actions',
-            flex: 2,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => (
-                <>
-                    <IconButton
-                        aria-label="edit"
-                        // onClick={() => handleEdit(params.row)}
-                    >
-                        <EditIcon />
-                    </IconButton>
-                    <IconButton
-                        aria-label="delete"
-                        // onClick={() => handleDelete(params.row)}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-                </>
-            ),
+            groupId: 'user Information',
+            description: '',
+            children: [{field: 'username'}, {field: 'email'}, { field: 'isActiveUser'}],
         },
     ];
+
 
     return (
         <div style={{ height: 500, width: '100%' }}>
@@ -72,19 +51,19 @@ export function EmployeeTable() {
                 pageSizeOptions={[5, 10, 20]}
                 initialState={{
                     pagination: { paginationModel: { pageSize: 5, page: 0 } },
-                    columns: {
-                        columnVisibilityModel: {
-                        },
-                    },
                 }}
                 slots={{
                     toolbar: GridToolbar, // toolbar enables filtering, export, column show/hide, etc
                 }}
                 disableRowSelectionOnClick
-                checkboxSelection={true}  // disable if you want row selection checkboxes off
+                checkboxSelection={false}  // disable if you want row selection checkboxes off
                 sortingMode="client"
                 filterMode="client"
                 paginationMode="client"
+                editMode="cell" // enable cell editing
+                processRowUpdate={processRowUpdate} // callback to persist the updated row
+                experimentalFeatures={{ newEditingApi: true }} // enable new editing API
+                columnGroupingModel={columnGroupingModel}
             />
         </div>
     );
