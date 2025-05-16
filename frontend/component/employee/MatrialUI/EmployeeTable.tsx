@@ -1,10 +1,27 @@
 import * as React from 'react';
 import {
-    DataGrid, type GridColumnGroupingModel,
-    GridToolbar,
+    DataGrid,
+    GridToolbarContainer,
+    GridToolbarColumnsButton,
+    GridToolbarFilterButton,
+    GridToolbarDensitySelector,
+    GridToolbarExport,
+    type GridColumnGroupingModel,
 } from '@mui/x-data-grid';
 import { fetchAllUsers } from '../../../api/auth';
-import {columns} from "./columns.tsx";
+import { columns } from './columns.tsx';
+
+// Custom toolbar with density selector
+function CustomToolbar() {
+    return (
+        <GridToolbarContainer>
+            <GridToolbarColumnsButton />
+            <GridToolbarFilterButton />
+            <GridToolbarDensitySelector />
+            <GridToolbarExport />
+        </GridToolbarContainer>
+    );
+}
 
 export function EmployeeTable() {
     const [data, setData] = React.useState([]);
@@ -28,20 +45,22 @@ export function EmployeeTable() {
         fetchData();
     }, []);
 
-    const processRowUpdate = (newRow) => {
+    const processRowUpdate = (newRow: any) => {
         console.log('Updated Row:', newRow);
-        // Here, you can make an API call to persist the changes to the backend
+        // Optionally send updated row to backend
         return newRow;
     };
 
     const columnGroupingModel: GridColumnGroupingModel = [
         {
             groupId: 'user Information',
-            description: '',
-            children: [{field: 'username'}, {field: 'email'}, { field: 'isActiveUser'}],
+            children: [
+                { field: 'username' },
+                { field: 'email' },
+                { field: 'isActiveUser' },
+            ],
         },
     ];
-
 
     return (
         <div style={{ height: 500, width: '100%' }}>
@@ -50,19 +69,21 @@ export function EmployeeTable() {
                 columns={columns}
                 pageSizeOptions={[5, 10, 20]}
                 initialState={{
+                    density: 'comfortable',
                     pagination: { paginationModel: { pageSize: 5, page: 0 } },
                 }}
                 slots={{
-                    toolbar: GridToolbar, // toolbar enables filtering, export, column show/hide, etc
+                    toolbar: CustomToolbar,
                 }}
+                showToolbar
                 disableRowSelectionOnClick
-                checkboxSelection={false}  // disable if you want row selection checkboxes off
+                checkboxSelection={false}
                 sortingMode="client"
                 filterMode="client"
                 paginationMode="client"
-                editMode="cell" // enable cell editing
-                processRowUpdate={processRowUpdate} // callback to persist the updated row
-                experimentalFeatures={{ newEditingApi: true }} // enable new editing API
+                editMode="cell"
+                processRowUpdate={processRowUpdate}
+                experimentalFeatures={{ newEditingApi: true }}
                 columnGroupingModel={columnGroupingModel}
             />
         </div>
