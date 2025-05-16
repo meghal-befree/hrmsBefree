@@ -31,6 +31,8 @@ export const EmployeeTable: React.FC = () => {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnOrder, setColumnOrder] = React.useState<string[]>([]);
+    const [columnPinning, setColumnPinning] = React.useState<{ [colId: string]: 'left' | 'right' | undefined }>({});
+
 
     // Initialize column order once data & columns loaded
     React.useEffect(() => {
@@ -72,6 +74,30 @@ export const EmployeeTable: React.FC = () => {
         />
     );
 
+    function calculateLeftOffset(colId: string) {
+        const pinnedLeftCols = columns
+            .map((c) => c.accessorKey as string)
+            .filter((id) => columnPinning[id] === 'left');
+        let offset = 0;
+        for (const id of pinnedLeftCols) {
+            if (id === colId) break;
+            offset += 150; // your column width in px, or calculate dynamically
+        }
+        return offset;
+    }
+
+    function calculateRightOffset(colId: string) {
+        const pinnedRightCols = columns
+            .map((c) => c.accessorKey as string)
+            .filter((id) => columnPinning[id] === 'right')
+            .reverse();
+        let offset = 0;
+        for (const id of pinnedRightCols) {
+            if (id === colId) break;
+            offset += 150;
+        }
+        return offset;
+    }
     const renderTableHeader = () => (
         <thead>
         {table.getHeaderGroups().map((headerGroup) => (
@@ -96,6 +122,13 @@ export const EmployeeTable: React.FC = () => {
                                 setColumnOrder(newOrder);
                             }
                         }}
+                        style={{
+                            position: columnPinning[header.column.id] ? 'sticky' : undefined,
+                            left: columnPinning[header.column.id] === 'left' ? calculateLeftOffset(header.column.id) : undefined,
+                            right: columnPinning[header.column.id] === 'right' ? calculateRightOffset(header.column.id) : undefined,
+                            backgroundColor: 'white',
+                            zIndex: columnPinning[header.column.id] ? 2 : 1,
+                        }}
                     >
                         <Box style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'grab' }}>
                             <svg
@@ -110,6 +143,21 @@ export const EmployeeTable: React.FC = () => {
                                 <path d="M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm240 0q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm240 0q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160ZM240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400ZM240-640q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 0q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Zm240 0q-33 0-56.5-23.5T640-720q0-33 23.5-56.5T720-800q33 0 56.5 23.5T800-720q0 33-23.5 56.5T720-640Z" />
                             </svg>
                             {flexRender(header.column.columnDef.header, header.getContext())}
+                            <button
+                                onClick={() => {
+                                    setColumnPinning((old) => {
+                                        const current = old[header.column.id];
+                                        if (!current) return { ...old, [header.column.id]: 'left' };
+                                        if (current === 'left') return { ...old, [header.column.id]: 'right' };
+                                        const { [header.column.id]: _, ...rest } = old;
+                                        return rest;
+                                    });
+                                }}
+                                title="Toggle pin (Left → Right → None)"
+                                style={{ marginLeft: 'auto' }}
+                            >
+                                {columnPinning[header.column.id] === 'left' ? '📌L' : columnPinning[header.column.id] === 'right' ? '📌R' : '📍'}
+                            </button>
                             {header.column.getIsSorted() === 'asc'
                                 ? ' 🔼'
                                 : header.column.getIsSorted() === 'desc'
@@ -138,9 +186,25 @@ export const EmployeeTable: React.FC = () => {
         <tbody>
         {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                    const pinnedSide = columnPinning[cell.column.id]; // 'left' | 'right' | undefined
+                    return (
+                        <td
+                            key={cell.id}
+                            style={{
+                                minWidth: 150,
+                                width: 150,
+                                position: pinnedSide ? 'sticky' : undefined,
+                                left: pinnedSide === 'left' ? calculateLeftOffset(cell.column.id) : undefined,
+                                right: pinnedSide === 'right' ? calculateRightOffset(cell.column.id) : undefined,
+                                backgroundColor: 'white',
+                                zIndex: pinnedSide ? 1 : undefined,
+                            }}
+                        >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                    );
+                })}
             </tr>
         ))}
         </tbody>
@@ -183,10 +247,14 @@ export const EmployeeTable: React.FC = () => {
     return (
         <div>
             {renderGlobalSearch()}
-            <table border={1} cellPadding={10} style={{ borderCollapse: 'collapse', width: '100%' }}>
-                {renderTableHeader()}
-                {renderTableBody()}
-            </table>
+            <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+                <div style={{ minWidth: '1000px' }}>
+                    <table border={1} cellPadding={10} style={{ borderCollapse: 'collapse', width: '100%' }}>
+                        {renderTableHeader()}
+                        {renderTableBody()}
+                    </table>
+                </div>
+            </div>
             {renderPaginationControls()}
         </div>
     );
