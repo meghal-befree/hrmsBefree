@@ -5,6 +5,7 @@ import {
     GridToolbarColumnsButton,
     GridToolbarFilterButton,
     GridToolbarDensitySelector,
+    GridToolbarQuickFilter,
     GridToolbarExport,
     type GridColumnGroupingModel,
 } from '@mui/x-data-grid';
@@ -19,6 +20,7 @@ function CustomToolbar() {
             <GridToolbarFilterButton />
             <GridToolbarDensitySelector />
             <GridToolbarExport />
+            <GridToolbarQuickFilter />
         </GridToolbarContainer>
     );
 }
