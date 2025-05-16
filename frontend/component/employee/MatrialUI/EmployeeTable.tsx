@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { fetchAllUsers } from '../../../api/auth';
+import {IconButton} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export function EmployeeTable() {
     const [data, setData] = React.useState([]);
@@ -36,6 +39,29 @@ export function EmployeeTable() {
             sortable: true,
             renderCell: (params: any) => (params.value ? 'Active User' : 'Deactivated User'),
         },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            flex: 2,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <>
+                    <IconButton
+                        aria-label="edit"
+                        // onClick={() => handleEdit(params.row)}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton
+                        aria-label="delete"
+                        // onClick={() => handleDelete(params.row)}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
+                </>
+            ),
+        },
     ];
 
     return (
@@ -48,8 +74,6 @@ export function EmployeeTable() {
                     pagination: { paginationModel: { pageSize: 5, page: 0 } },
                     columns: {
                         columnVisibilityModel: {
-                            // you can set default column visibility here if needed
-                            // for example hide email by default: email: false
                         },
                     },
                 }}
@@ -57,7 +81,7 @@ export function EmployeeTable() {
                     toolbar: GridToolbar, // toolbar enables filtering, export, column show/hide, etc
                 }}
                 disableRowSelectionOnClick
-                checkboxSelection={false}  // disable if you want row selection checkboxes off
+                checkboxSelection={true}  // disable if you want row selection checkboxes off
                 sortingMode="client"
                 filterMode="client"
                 paginationMode="client"
