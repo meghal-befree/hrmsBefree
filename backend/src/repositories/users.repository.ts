@@ -89,4 +89,56 @@ export class UsersRepository {
   async softDeleteUser(user: Partial<User>): Promise<User> {
     return this.repo.save(user);
   }
+
+  async findAllUserTable({
+    page = 1,
+    limit = 10,
+    search = '',
+    filters = [],
+    sort = [],
+  }: {
+    page: number;
+    limit: number;
+    search?: string;
+    filters?: { id: string; value: string }[];
+    sort?: { id: string; desc: boolean }[];
+  }) {
+
+    const where: any = { isDeleted: false };
+
+    // Global search
+    if (search) {
+      where.username = ILike(`%${search}%`);
+    }
+
+    // Column filters
+    filters.forEach((filter) => {
+      if (filter.id === 'username') {
+        where.username = ILike(`%${filter.value}%`);
+      }
+      if (filter.id === 'email') {
+        where.email = ILike(`%${filter.value}%`);
+      }
+    });
+
+    // Sorting
+    const order: Record<string, 'ASC' | 'DESC'> = {};
+    sort.forEach((sortObj) => {
+      order[sortObj.id] = sortObj.desc ? 'DESC' : 'ASC';
+    });
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      order: Object.keys(order).length ? order : { id: 'DESC' },
+    });
+
+    return {
+      data: data.map(({ password, ...rest }) => rest),
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
+  }
 }

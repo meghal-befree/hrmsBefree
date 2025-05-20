@@ -35,15 +35,28 @@ type TableColumn<T> = ColumnDef<T, any> & {
 export interface Props<T> {
     columns: TableColumn<T>[];
     queryKey: string[];
-    queryFn: () => Promise<T[]>;
+    queryFn: (params: {
+        pageIndex: number;
+        pageSize: number;
+        globalFilter: string;
+        columnFilters: ColumnFiltersState;
+        sorting: SortingState;
+    }) => Promise<{ data: T[]; total: number }>;
 }
 
 export function MuiDataTable<T extends object>({ columns, queryKey, queryFn }: Props<T>) {
-    const { data = [], isLoading } = useQuery<T[]>({ queryKey, queryFn });
-
+    const [pageIndex, setPageIndex] = React.useState(0);
+    const [pageSize, setPageSize] = React.useState(10);
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
+
+    const { data, isLoading } = useQuery({
+        queryKey: [...queryKey, pageIndex, pageSize, globalFilter, columnFilters, sorting],
+        queryFn: () =>
+            queryFn({ pageIndex, pageSize, globalFilter, columnFilters, sorting }),
+        keepPreviousData: true,
+    });
 
     const processedColumns = columns.map(col => ({
         ...col,
@@ -52,21 +65,27 @@ export function MuiDataTable<T extends object>({ columns, queryKey, queryFn }: P
     }));
 
     const table = useReactTable({
-        data,
+        data: data?.data ?? [],
         columns: processedColumns,
+        pageCount: Math.ceil((data?.total ?? 0) / pageSize),
+        manualPagination: true,
+        manualSorting: true,
+        manualFiltering: true,
         state: {
             globalFilter,
             columnFilters,
             sorting,
+            pagination: { pageIndex, pageSize },
         },
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
         onSortingChange: setSorting,
-        globalFilterFn: 'includesString',
+        onPaginationChange: updater => {
+            const newState = typeof updater === 'function' ? updater({ pageIndex, pageSize }) : updater;
+            setPageIndex(newState.pageIndex);
+            setPageSize(newState.pageSize);
+        },
         getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
     });
 
     if (isLoading) return <Box display="flex" justifyContent="center"><CircularProgress /></Box>;
@@ -127,8 +146,8 @@ export function MuiDataTable<T extends object>({ columns, queryKey, queryFn }: P
                                         variant="outlined"
                                         size="small"
                                         placeholder="Filter"
-                                        value={(header.column.getFilterValue() ?? "") as string}
-                                        onChange={(e) => header.column.setFilterValue(e.target.value)}
+                                        defaultValue={(header.column.getFilterValue() ?? "") as string}
+                                        onBlur={(e) => header.column.setFilterValue(e.target.value)}
                                         fullWidth
                                     />
                                 ) : null
