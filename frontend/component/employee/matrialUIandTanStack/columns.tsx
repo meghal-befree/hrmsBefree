@@ -27,6 +27,7 @@ export const columns: ColumnDef<Employee>[] = [
         meta: {
             enableSorting: true,
             enableColumnFilter: true,
+            filterType: 'text',
         },
     },
     {
@@ -36,6 +37,7 @@ export const columns: ColumnDef<Employee>[] = [
         meta: {
             enableSorting: true,
             enableColumnFilter: true,
+            filterType: 'text',
         },
     },
     {
@@ -45,6 +47,11 @@ export const columns: ColumnDef<Employee>[] = [
         meta: {
             enableSorting: true,
             enableColumnFilter: true,
+            filterType: 'select',
+            filterOptions: [
+                { label: 'Active User', value: true },
+                { label: 'Deactivated User', value: false },
+            ],
         },
         filterFn: (row, columnId, filterValue) => {
             const value = row.getValue<boolean>(columnId);

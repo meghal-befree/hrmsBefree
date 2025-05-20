@@ -19,6 +19,8 @@ import {TableHeader} from "./TableHeader.tsx";
 interface CustomMeta {
     enableSorting?: boolean;
     enableColumnFilter?: boolean;
+    filterType?: 'text' | 'select' | 'multiselect';
+    filterOptions?: { label: string; value: any }[];
 }
 
 type TableColumn<T> = ColumnDef<T, any> & {

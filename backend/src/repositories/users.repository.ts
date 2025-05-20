@@ -119,6 +119,9 @@ export class UsersRepository {
       if (filter.id === 'email') {
         where.email = ILike(`%${filter.value}%`);
       }
+      if (filter.id === 'isActiveUser') {
+        where.isActiveUser = filter.value;
+      }
     });
 
     // Sorting
