@@ -7,7 +7,8 @@ import {
 import type { ColumnDef, ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import {
     Table, TableBody, TableCell, TableContainer, TableRow,
-    Paper, TextField, Box, IconButton, Select, MenuItem, Typography, CircularProgress, Button, Tooltip
+    Paper, TextField, Box, IconButton, Select, MenuItem, Typography, CircularProgress, Tooltip,
+    Badge
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import FirstPageIcon from '@mui/icons-material/FirstPage';
@@ -15,6 +16,7 @@ import LastPageIcon from '@mui/icons-material/LastPage';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
 import {TableHeader} from "./TableHeader.tsx";
 
 interface CustomMeta {
@@ -143,14 +145,31 @@ export function MuiDataTable<T extends object>({ columns, queryKey, queryFn }: P
                 sx={{ width: '300px' }}
             />
 
-            <Tooltip title={showFilters ? "Hide Filters" : "Show Filters"}>
-                <IconButton
-                    onClick={() => setShowFilters(prev => !prev)}
-                    color="primary"
-                >
-                    <FilterListIcon />
-                </IconButton>
-            </Tooltip>
+            <Box display="flex" alignItems="center" gap={1}>
+                {/* Toggle Filter Button */}
+                <Tooltip title={showFilters ? "Hide Filters" : "Show Filters"}>
+                    <IconButton onClick={() => setShowFilters(prev => !prev)} color="primary">
+                        <Badge badgeContent={columnFilters.length} color="secondary">
+                            <FilterListIcon />
+                        </Badge>
+                    </IconButton>
+                </Tooltip>
+
+                {/* Clear Filter Button (only shown if filters are applied) */}
+                {columnFilters.length > 0 && (
+                    <Tooltip title="Clear All Filters">
+                        <IconButton
+                            onClick={() => {
+                                table.resetColumnFilters();
+                                setColumnFilters([]);
+                            }}
+                            color="error"
+                        >
+                            <ClearIcon />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </Box>
         </Box>
     );
 
