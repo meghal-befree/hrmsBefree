@@ -130,4 +130,31 @@ export class AuthService {
 
     return this.usersRepository.update(user);
   }
+
+  async findAllUserTable({
+    page,
+    limit,
+    search,
+    filters,
+    sort,
+  }: {
+    page: number;
+    limit: number;
+    search?: string;
+    filters?: { id: string; value: string }[];
+    sort?: { id: string; desc: boolean }[];
+  }) {
+    try {
+      return await this.usersRepository.findAllUserTable({
+        page,
+        limit,
+        search,
+        filters,
+        sort,
+      });
+    } catch (error) {
+      console.error('Service error in findAllUserTable:', error);
+      throw error; // rethrow so controller can catch it
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import http from './http';
+import type {ColumnFiltersState, SortingState} from "@tanstack/react-table";
 
 export const loginUser = async (data: { email: string; password: string }) => {
     return http.post('/auth/login', data);
@@ -79,3 +80,74 @@ export const softDeleteUser = async (id: number) => {
     return http.patch(`/auth/user/${id}/soft-delete`);
 }
 
+// export async function fetchAllUsers({
+//                                         pageIndex,
+//                                         pageSize,
+//                                         globalFilter,
+//                                         columnFilters,
+//                                         sorting,
+//                                     }: {
+//     pageIndex: number;
+//     pageSize: number;
+//     globalFilter: string;
+//     columnFilters: ColumnFiltersState;
+//     sorting: SortingState;
+// }) {
+//     const params = new URLSearchParams({
+//         page: (pageIndex + 1).toString(),
+//         limit: pageSize.toString(),
+//         search: globalFilter,
+//         // Add other filters/sorts as needed
+//     });
+//
+//     columnFilters.forEach(filter =>
+//         params.append(`filters[${filter.id}]`, filter.value)
+//     );
+//
+//     sorting.forEach(sort =>
+//         params.append(`sort[${sort.id}]`, sort.desc ? 'desc' : 'asc')
+//     );
+//
+//     console.log('params', params.toString());
+//
+//     const response =await http.post(`/auth/users/table-data?${params.toString()}`);
+//     return { data: response?.data?.data || [], total: response?.data?.total || 0, page: response?.data?.page || 1, lastPage: response?.data?.lastPage || 1 };
+// }
+
+export async function fetchAllUsers({
+                                        pageIndex,
+                                        pageSize,
+                                        globalFilter,
+                                        columnFilters,
+                                        sorting,
+                                    }: {
+    pageIndex: number;
+    pageSize: number;
+    globalFilter: string;
+    columnFilters: ColumnFiltersState;
+    sorting: SortingState;
+}) {
+    const params = new URLSearchParams({
+        page: (pageIndex + 1).toString(),
+        limit: pageSize.toString(),
+        search: globalFilter || '',
+    });
+
+    if (columnFilters.length > 0) {
+        params.append('filters', JSON.stringify(columnFilters));
+    }
+
+    if (sorting.length > 0) {
+        params.append('sort', JSON.stringify(sorting));
+    }
+
+    console.log('params', params.toString());
+
+    const response = await http.post(`/auth/users/table-data?${params.toString()}`);
+    return {
+        data: response?.data?.data || [],
+        total: response?.data?.total || 0,
+        page: response?.data?.page || 1,
+        lastPage: response?.data?.lastPage || 1,
+    };
+}

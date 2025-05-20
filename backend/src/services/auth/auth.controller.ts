@@ -13,6 +13,8 @@ import {
   UseGuards,
   Patch,
   ParseIntPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, SignupDto, UpdateUserDto } from '../../dtos/login.dto';
@@ -46,8 +48,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('users')
   async findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('name') name?: string,
     @Query('email') email?: string,
   ): Promise<any> {
@@ -214,5 +216,43 @@ export class AuthController {
     // Write file to buffer and send
     const buffer = await workbook.xlsx.writeBuffer();
     res.send(buffer);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('users/table-data')
+  async findAllUserTable(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('filters') filters?: string,
+    @Query('sort') sort?: string,
+  ): Promise<any> {
+    try {
+      const parsedPage = Number(page);
+      const parsedLimit = Number(limit);
+
+      // Fallback defaults if parsing fails
+      const safePage = isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+      const safeLimit =
+        isNaN(parsedLimit) || parsedLimit < 1 ? 10 : parsedLimit;
+      return await this.authService.findAllUserTable({
+        page: safePage,
+        limit: safeLimit,
+        search,
+        filters: filters ? JSON.parse(filters) : [],
+        sort: sort ? JSON.parse(sort) : [],
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Failed to fetch users table data',
+          details: errorMessage,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
