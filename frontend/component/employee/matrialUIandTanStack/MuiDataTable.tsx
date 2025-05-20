@@ -7,13 +7,14 @@ import {
 import type { ColumnDef, ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import {
     Table, TableBody, TableCell, TableContainer, TableRow,
-    Paper, TextField, Box, IconButton, Select, MenuItem, Typography, CircularProgress
+    Paper, TextField, Box, IconButton, Select, MenuItem, Typography, CircularProgress, Button, Tooltip
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import {TableHeader} from "./TableHeader.tsx";
 
 interface CustomMeta {
@@ -48,6 +49,7 @@ export function MuiDataTable<T extends object>({ columns, queryKey, queryFn }: P
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [showFilters, setShowFilters] = React.useState(false);
 
     const { data, isLoading } = useQuery({
         queryKey: [...queryKey, pageIndex, pageSize, globalFilter, columnFilters, sorting],
@@ -130,20 +132,34 @@ export function MuiDataTable<T extends object>({ columns, queryKey, queryFn }: P
         </Select>
     </Box>
 
-    const renderGlobalSearch = () =>  <TextField
-        label="Search"
-        variant="outlined"
-        value={globalFilter}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        sx={{ mb: 2 }}
-    />
+    const renderToolbar = () => (
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <TextField
+                label="Search"
+                variant="outlined"
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                size="small"
+                sx={{ width: '300px' }}
+            />
+
+            <Tooltip title={showFilters ? "Hide Filters" : "Show Filters"}>
+                <IconButton
+                    onClick={() => setShowFilters(prev => !prev)}
+                    color="primary"
+                >
+                    <FilterListIcon />
+                </IconButton>
+            </Tooltip>
+        </Box>
+    );
 
     return (
         <Box>
-            {renderGlobalSearch()}
+            {renderToolbar()}
             <TableContainer component={Paper}>
                 <Table sx={{ border: '1px solid #ccc' }}>
-                    <TableHeader headerGroups={table.getHeaderGroups()} />
+                    <TableHeader headerGroups={table.getHeaderGroups()} showFilters={showFilters}/>
                     {renderTableBody()}
                 </Table>
             </TableContainer>

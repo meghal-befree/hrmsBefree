@@ -11,15 +11,14 @@ import {
 } from "@mui/material";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import {SelectFilter} from "./filter/SelectFilter.tsx";
-import {MultiSelectFilter} from "./filter/MultiSelectFilter.tsx";
-import {TextFilter} from "./filter/TextFilter.tsx";
+import {TableFilterRow} from "./filter/TableFilterRow.tsx";
 
 interface Props<T> {
     headerGroups: HeaderGroup<T>[];
+    showFilters?: boolean;
 }
 
-export function TableHeader<T>({ headerGroups }: Props<T>) {
+export function TableHeader<T>({ headerGroups, showFilters }: Props<T>) {
     return (
         <TableHead>
             {headerGroups.map((group) => (
@@ -54,58 +53,8 @@ export function TableHeader<T>({ headerGroups }: Props<T>) {
                     ))}
                 </TableRow>
             ))}
-
-            {/* Filter Row */}
-            {headerGroups.map((group) => (
-                <TableRow key={group.id + "-filters"}>
-                    {group.headers.map((header) => {
-                        const meta = header.column.columnDef.meta as {
-                            enableColumnFilter?: boolean;
-                            filterType?: "text" | "select" | "multiselect";
-                            filterOptions?: { label: string; value: any }[];
-                        };
-
-                        const filterValue = header.column.getFilterValue();
-
-                        return (
-                            <TableCell
-                                key={header.id + "-filter"}
-                                sx={{ border: "1px solid #ccc", backgroundColor: "#fafafa" }}
-                            >
-                                {meta?.enableColumnFilter && header.column.getCanFilter() && (() => {
-                                    switch (meta.filterType) {
-                                        case "select":
-                                            return (
-                                                <SelectFilter
-                                                    value={filterValue ?? ""}
-                                                    options={meta.filterOptions ?? []}
-                                                    onChange={(val) => header.column.setFilterValue(val)}
-                                                />
-                                            );
-
-                                        case "multiselect":
-                                            return (
-                                                <MultiSelectFilter
-                                                    value={Array.isArray(filterValue) ? filterValue : []}
-                                                    options={meta.filterOptions ?? []}
-                                                    onChange={(val) => header.column.setFilterValue(val)}
-                                                />
-                                            );
-
-                                        case "text":
-                                        default:
-                                            return (
-                                                <TextFilter
-                                                    value={(filterValue ?? "") as string}
-                                                    onChange={(val) => header.column.setFilterValue(val)}
-                                                />
-                                            );
-                                    }
-                                })()}
-                            </TableCell>
-                        );
-                    })}
-                </TableRow>
+            {showFilters && headerGroups.map((group) => (
+                <TableFilterRow key={group.id + "-filters"} headerGroup={group} />
             ))}
         </TableHead>
     );
